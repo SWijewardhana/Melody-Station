@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+   
+    stages {
+        stage('SCM Checkout') {
+            steps {
+                retry(3) {
+                    git branch: 'main', url: 'https://github.com/SWijewardhana/Melody-Station'
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {  
+                bat 'docker build -t shashiniwijewardhana/phpapp:%BUILD_NUMBER% .'
+            }
+        }
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerpassword')]) {
+                    script {
+                        bat "docker login -u shashiniwijewardhana -p Shashini@1997"
+                    }
+                }
+            }
+        }
+        stage('Push Image') {
+            steps {
+                bat 'docker push shashiniwijewardhana/phpapp:%BUILD_NUMBER%'
+            }
+        }
+    }
+    post {
+        always {
+            bat 'docker logout'
+        }
+    }
+}
+ 
