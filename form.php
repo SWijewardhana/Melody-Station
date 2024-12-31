@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Rent - PhotoFolio Bootstrap Template</title>
+  <title>Melody Station Dashboard</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -149,7 +149,9 @@
           </div>
         </div>
 
-        <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up" data-aos-delay="300">
+        <form action="rent-handler.php" method="post" class="php-email-form" data-aos="fade-up" data-aos-delay="300">
+        
+
           <div class="row gy-4">
 
             <div class="col-md-6">

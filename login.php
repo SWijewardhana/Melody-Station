@@ -1,3 +1,111 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include database connection
+include('./include/db.php');
+
+// Redirect user if already logged in
+if (isset($_SESSION['user'])) {
+    header('Location: ./dashboard.php');
+    exit;
+}
+
+// Login logic
+if (isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Sanitize and trim user input for security
+    $username = mysqli_real_escape_string($conn, $username);
+    $password = mysqli_real_escape_string($conn, $password);
+    $password = trim($password); // Trim password to remove leading/trailing spaces
+
+    // Prepare and execute query to check if the username exists
+    $query = "SELECT * FROM user WHERE username = ?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    // Check if user exists
+    if (mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+
+        // Debug: Print the stored password hash and the entered password
+        echo "Stored password hash: " . $user['password'] . "<br>";
+        echo "Entered password: " . $password . "<br>";
+
+        // Verify the entered password with the hashed password stored in the database
+        if (password_verify($password, $user['password'])) {
+            // Set session and redirect user to the form
+            $_SESSION['user'] = $username;
+            header('Location: ./dashboard.php');
+            exit;
+        } else {
+            // Invalid password
+            echo "<script>alert('Invalid username or password');</script>";
+        }
+    } else {
+        // Username not found
+        echo "<script>alert('Invalid username or password');</script>";
+    }
+}
+
+// Registration logic
+if (isset($_POST['register'])) {
+    $username = $_POST['reg_username'];
+    $password = $_POST['reg_password'];
+    $email = $_POST['reg_email'];
+
+    // Sanitize and validate user input
+    $username = mysqli_real_escape_string($conn, $username);
+    $password = mysqli_real_escape_string($conn, $password);
+    $email = mysqli_real_escape_string($conn, $email);
+
+    // Check if user exists
+    $query = "SELECT * FROM user WHERE username = ?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if (mysqli_num_rows($result) > 0) {
+        // Username already exists
+        echo "<script>alert('Username already exists');</script>";
+    } else {
+        // Hash the password using password_hash() (more secure than md5)
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // Debug: Check if the password is being hashed correctly
+        echo "Hashed password: " . $hashed_password . "<br>";
+
+        // Insert new user with hashed password
+        $query = "INSERT INTO user (username, password, email, date) VALUES (?, ?, ?, NOW())";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "sss", $username, $hashed_password, $email);
+
+        if (mysqli_stmt_execute($stmt)) {
+            // Registration successful
+            echo "<script>alert('Registration successful!');</script>";
+             // Redirect to dashboard
+            header('Location: ./dashboard.php');
+            exit;
+
+
+        } else {
+            // Registration error
+            echo "<script>alert('Error: Unable to register');</script>";
+        }
+    }
+}
+?>
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -188,7 +296,13 @@
 
     </style>
 </head>
+
 <body>
+
+
+    
+    <form method="POST">
+        
     <div class="row">
         <div class="col-md-6 mx-auto p-0">
             <div class="card">
@@ -200,45 +314,52 @@
                         <label for="tab-2" class="tab">Sign Up</label>
                         <div class="login-space">
                             <div class="login">
-                                <div class="group">
-                                    <label for="user" class="label">Username</label>
-                                    <input id="user" type="text" class="input" placeholder="Enter your username" required>
-                                </div>
-                                <div class="group">
-                                    <label for="pass" class="label">Password</label>
-                                    <input id="pass" type="password" class="input" data-type="password" placeholder="Enter your password" required>
-                                </div>
+                            <div class="group">
+                                        <label for="username" class="label">Username</label>
+                                        <input id="username" type="text" class="input" name="username" placeholder="Enter your username" required>
+                                    </div>
+                                    <div class="group">
+                                        <label for="password" class="label">Password</label>
+                                        <input id="password" type="password" class="input" name="password" data-type="password" placeholder="Enter your password" required>
+                                    </div>
                                 <div class="group">
                                     <input id="check" type="checkbox" class="check" checked>
                                     <label for="check"><span class="icon"></span> Keep me Signed in</label>
                                 </div>
                                 <div class="group">
-                                    <input type="submit" class="button" value="Sign In">
+                                    <input type="submit" name="login" class="button" value="Sign In">
                                 </div>
                                 <div class="hr"></div>
                                 <div class="foot">
                                     <a href="#">Forgot Password?</a>
                                 </div>
                             </div>
+                            
+</form>
+
+                <form method="POST">
                             <div class="sign-up-form">
                                 <div class="group">
-                                    <label for="user" class="label">Username</label>
-                                    <input id="user" type="text" class="input" placeholder="Create your Username" required>
+                                    <label for="reg_user" class="label">Username</label>
+                                    <input id="reg_user" type="text" class="input" name="reg_username" placeholder="Create your Username" required>
+                                </div>
+
+                                <div class="group">
+                                    <label for="reg_email" class="label">Email Address</label>
+                                    <input id="reg_email" type="email" class="input" name="reg_email" placeholder="Enter your email address" required>
+                                </div>
+
+                                <div class="group">
+                                    <label for="reg_pass" class="label">Password</label>
+                                    <input id="reg_pass" type="password" class="input" name="reg_password" data-type="password" placeholder="Create your password" required>
                                 </div>
                                 <div class="group">
-                                    <label for="pass" class="label">Password</label>
-                                    <input id="pass" type="password" class="input" data-type="password" placeholder="Create your password" required>
+                                    <label for="reg_pass_repeat" class="label">Repeat Password</label>
+                                    <input id="reg_pass_repeat" type="password" class="input" data-type="password" placeholder="Repeat your password" required>
                                 </div>
+                                
                                 <div class="group">
-                                    <label for="pass" class="label">Repeat Password</label>
-                                    <input id="pass" type="password" class="input" data-type="password" placeholder="Repeat your password" required>
-                                </div>
-                                <div class="group">
-                                    <label for="pass" class="label">Email Address</label>
-                                    <input id="pass" type="text" class="input" placeholder="Enter your email address" required>
-                                </div>
-                                <div class="group">
-                                    <input type="submit" class="button" value="Sign Up">
+                                    <input type="submit" name="register" class="button" value="Sign Up">
                                 </div>
                                 <div class="hr"></div>
                                 <div class="foot">
@@ -251,5 +372,14 @@
             </div>
         </div>
     </div>
+</form>
 </body>
+
+
+
+
+
+
+
+
 </html>

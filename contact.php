@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Contact - PhotoFolio Bootstrap Template</title>
+  <title>Contact</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -206,7 +206,7 @@
         <!-- You can delete the links only if you've purchased the pro version. -->
         <!-- Licensing information: https://bootstrapmade.com/license/ -->
         <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        Designed by <a href="https://melodystation.com/">MelodyStation</a>
       </div>
     </div>
 
