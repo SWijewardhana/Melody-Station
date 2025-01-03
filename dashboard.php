@@ -352,7 +352,7 @@ closeConnection();
         document.getElementById("formTitle").innerText = 'Add Item';
         document.getElementById("form").reset();
         document.getElementById("itemId").value = ''; 
-        //alert("Add Item form is now visible.");
+        document.getElementById("currentImage").style.display = 'none'; // Hide current image
     }
 
     function viewItems() {
@@ -363,14 +363,22 @@ closeConnection();
     function editItem(itemId) {
         const itemRow = document.querySelector(`tr[data-id="${itemId}"]`);
         const name = itemRow.querySelector(".name").innerText;
-        const image = itemRow.querySelector(".image img").src;
+        const image = itemRow.querySelector(".image").innerText; // Get the image URL or path
         const description = itemRow.querySelector(".description").innerText;
 
         // Populate the form with data for updating
         document.getElementById("itemId").value = itemId;
         document.getElementById("itemName").value = name;
-        document.getElementById("itemImage").value = image;
         document.getElementById("itemDescription").value = description;
+
+        // Display the current image (if any)
+        const currentImageElement = document.getElementById("currentImage");
+        if (image) {
+            currentImageElement.style.display = 'block'; // Show image
+            currentImageElement.src = image; // Set the image URL
+        } else {
+            currentImageElement.style.display = 'none'; // Hide if no image
+        }
 
         // Change form title to update
         document.getElementById("formTitle").innerText = 'Update Item';
@@ -383,6 +391,31 @@ closeConnection();
         document.getElementById("saveBtn").style.display = 'block';
     });
 </script>
+
+<!-- Add or Update Item Form -->
+<div id="itemForm">
+    <h2 id="formTitle">Add Item</h2>
+    <form method="POST" id="form" enctype="multipart/form-data">
+        <input type="hidden" name="id" id="itemId">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="itemName" required><br><br>
+
+        <label for="image">Upload Image</label>
+        <input type="file" name="image" id="itemImage" accept="image/*"><br><br>
+
+        <!-- Display current image (if available) -->
+        <div id="currentImageContainer" style="display: none;">
+            <p>Current Image:</p>
+            <img id="currentImage" src="" alt="Current Image" style="max-width: 200px; display: none;">
+        </div>
+
+        <label for="description">Description</label>
+        <textarea name="description" id="itemDescription" required></textarea><br><br>
+
+        <button type="submit" name="save" id="saveBtn">Save</button>
+    </form>
+</div>
+
 
 </body>
 </html>
